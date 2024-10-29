@@ -1,7 +1,6 @@
 __pycache__/*
 */__pycache__/*
 */*/__pycache__/*
-results/*
 models/MoCo_init/*
 models/MoCo_supervised/*
 models/supervised/*
