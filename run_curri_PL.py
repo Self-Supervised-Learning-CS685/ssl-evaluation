@@ -131,7 +131,13 @@ def main(args):
     dataloaders_dict['test'] = DataLoader(image_datasets['test'],
                     batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers, drop_last=False)
 
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    if torch.cuda.is_available():
+        device = torch.device("cuda:0")
+    elif torch.backends.mps.is_available():
+        device = torch.device("mps")
+    else:
+        device = torch.device("cpu")
+    # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     #======================= Initialize the model ==============================
     model_ft = initialize_model(args.model, num_classes, feature_extract=False, 
@@ -140,7 +146,8 @@ def main(args):
     #======================= Class Weight ==============================
     ## This could be added
     cls_weight = [1.0 for tt in range(num_classes)]
-    cls_weight = torch.tensor(cls_weight,dtype=torch.float).cuda()
+    # cls_weight = torch.tensor(cls_weight,dtype=torch.float).cuda()
+    cls_weight = torch.tensor(cls_weight,dtype=torch.float).to(device)
 
     #======================= Set the loss ==============================
     if args.alg == "distill":
@@ -202,17 +209,19 @@ def main(args):
         else:
             print("=> Cannot find checkpoint '{}'" .format(checkpoint_filename))
 
-    # parallelize the model if using multiple gpus
-    print('using #GPUs:',torch.cuda.device_count())
-    if torch.cuda.device_count() > 1:
-        model_ft = torch.nn.DataParallel(model_ft)
+    if device == torch.device("cuda:0"):
+        # parallelize the model if using multiple gpus
+        print('using #GPUs:',torch.cuda.device_count())
+        if torch.cuda.device_count() > 1:
+            model_ft = torch.nn.DataParallel(model_ft)
     model_ft.to(device)
 
     # moving optimizer to gpu
     for state in optimizer.state.values():
         for k, v in state.items():
             if isinstance(v, torch.Tensor):
-                state[k] = v.cuda()
+                # state[k] = v.cuda()
+                state[k] = v.to(device)
 
     model_teacher = None
 
@@ -267,10 +276,11 @@ def main(args):
             del checkpoint['state_dict']['module.fc.weight']
             model_ft.load_state_dict(checkpoint['state_dict'], strict=False)
 
-        # parallelize the model if using multiple gpus
-        print('using #GPUs:',torch.cuda.device_count())
-        if torch.cuda.device_count() > 1:
-            model_ft = torch.nn.DataParallel(model_ft)
+        if device == torch.device("cuda:0"):
+            # parallelize the model if using multiple gpus
+            print('using #GPUs:',torch.cuda.device_count())
+            if torch.cuda.device_count() > 1:
+                model_ft = torch.nn.DataParallel(model_ft)
 
         model_ft.to(device)
         ## Reload optimizer

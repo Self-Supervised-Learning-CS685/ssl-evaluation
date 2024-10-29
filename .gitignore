@@ -7,3 +7,7 @@ models/supervised/*
 models/*.pth.tar
 slurm_err/*
 slurm_out/*
+results/*/checkpoints
+data/semi_fungi/images/*
+.DS_Store
+events.out.tfevents.*
