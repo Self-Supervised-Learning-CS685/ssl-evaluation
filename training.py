@@ -93,6 +93,13 @@ def test(model, dataloaders, args, logger, name="Best", criterion=nn.CrossEntrop
     test_corrects_1 = 0
     test_corrects_5 = 0
     test_loss = 0
+
+    dir_name = os.path.join(args.exp_prefix, args.exp_dir, 'test')
+    if not os.path.exists(dir_name):
+        os.makedirs(dir_name)
+    file_name = os.path.join(dir_name, "pl.txt")
+
+    f = open(file_name, "w")
     for i,data in enumerate(dataloaders['test']):
         inputs, target = data
         inputs = inputs.to(device).float()
@@ -109,6 +116,13 @@ def test(model, dataloaders, args, logger, name="Best", criterion=nn.CrossEntrop
 
             correct_1, correct_5 = compute_correct(outputs, target, topk=(1, 5))
             test_loss += loss.item()
+
+            preds, labels = F.softmax(outputs, 1).max(1)
+
+            ## Get PL and save to file
+            for j in range(preds.shape[0]):
+                # print(labels[j], target[j])
+                f.write("%d %d \n" % (target[j], labels[j]))
 
         test_corrects_1 += correct_1.item()
         test_corrects_5 += correct_5.item()
