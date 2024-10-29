@@ -23,4 +23,4 @@ class PL(nn.Module):
         return loss
 
     def __make_one_hot(self, y):
-        return torch.eye(self.n_classes)[y].to(y.device)
+        return torch.eye(self.n_classes, device=y.device)[y]
