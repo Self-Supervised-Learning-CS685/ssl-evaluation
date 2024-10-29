@@ -150,6 +150,7 @@ def main(args):
         ssl_obj = DistillKL(args.kd_T)
     elif args.alg == "PL":
         from lib.algs.pseudo_label import PL
+        print(f"Running pseudo labeling with: {args.threshold} threshold")
         ssl_obj = PL(args.threshold, num_classes)
     elif args.alg == "supervised":
         ssl_obj = None
