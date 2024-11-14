@@ -1,20 +1,46 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import pandas as pd
+import os
+import csv
 
 class PL(nn.Module):
-    def __init__(self, threshold, n_classes=10):
+    def __init__(self, threshold, n_classes=10, lambda_decay=0.5, mu=4):
         super().__init__()
         self.th = threshold
         self.n_classes = n_classes
+        self.lambda_decay = 0.99
+        self.mu = mu
 
     def forward(self, x, y, model, mask):
         # import ipdb; ipdb.set_trace()
         y_probs = y.softmax(1)
+                
         onehot_label = self.__make_one_hot(y_probs.max(1)[1]).float()
-        print(self.th)
-        self.th = self.th-0.00001
-        print(self.th)
+        print("old thres:", self.th)
+        
+        max_q_b = y_probs.max(dim=1)[0]
+        
+        #storing into a csv
+        mean_confidence = y_probs.mean(dim=1)[0].mean().item()
+        max_confidence = y_probs.max(dim=1)[0].mean().item()
+        
+        file_path = 'y_probs.csv'
+        new_row = [self.th, mean_confidence, max_confidence]
+        if not os.path.isfile(file_path):
+            with open(file_path, mode="w", newline="") as file:
+                writer = csv.writer(file)
+                writer.writerow(new_row)
+        else:
+            with open(file_path, mode="a", newline="") as file:
+                writer = csv.writer(file)
+                writer.writerow(new_row)
+        
+        print("new row added:", new_row)
+        
+        self.th = self.th + ((1-self.lambda_decay) * max_q_b.mean()).item()
+        
         gt_mask = (y_probs > self.th).float()
         gt_mask = gt_mask.max(1)[0] # reduce_any
         lt_mask = 1 - gt_mask # logical not
@@ -26,14 +52,15 @@ class PL(nn.Module):
 
         pred_classes = pred_onehot_label.argmax(dim=1)
         true_classes = onehot_label.argmax(dim=1)
-        print(y_probs)
+        #print(y_probs)
         correct_predictions = (pred_classes == true_classes).sum().item()
         total_images = onehot_label.size(0)
-        print(f"Correctly classified images: {correct_predictions} out of {total_images}")
+        #print(f"Correctly classified images: {correct_predictions} out of {total_images}")
 
+        
         loss = (-(p_target.detach() * F.log_softmax(output, 1)).sum(1)*mask).mean()
         # model.update_batch_stats(True)
-        quit()
+        ##quit()
         return loss
 
     def __make_one_hot(self, y):
