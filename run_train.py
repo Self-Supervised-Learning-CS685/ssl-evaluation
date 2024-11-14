@@ -158,8 +158,14 @@ def main(args):
         ssl_obj = DistillKL(args.kd_T)
     elif args.alg == "PL":
         from lib.algs.pseudo_label import PL
-        print(f"Running pseudo labeling with: {args.threshold} threshold")
-        ssl_obj = PL(args.threshold, num_classes)
+        if args.use_class_based_threshold:
+            print("Running pseudo labeling with class based threshold")
+            freq_per_class = image_datasets['l_train'].get_freq_per_class()
+            freq_per_class = torch.tensor(freq_per_class, dtype=torch.float).to(device)
+            ssl_obj = PL(args.threshold, num_classes, freq_per_class)
+        else:
+            print(f"Running pseudo labeling with: {args.threshold} threshold")
+            ssl_obj = PL(args.threshold, num_classes)
     elif args.alg == "supervised":
         ssl_obj = None
     else:
@@ -320,6 +326,7 @@ if __name__ == '__main__':
     parser.add_argument("--consis_coef", default=1.0, type=float)
     ## PL
     parser.add_argument("--threshold", default=0.95, type=float)
+    parser.add_argument("--use_class_based_threshold", action='store_true')
     # ## MM
     # parser.add_argument("--T", default=0.5, type=float)
     # parser.add_argument("--K", default=2, type=int)

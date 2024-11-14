@@ -1,0 +1,2 @@
+train | Iteration 100/10000 | Cls Loss 2.665180 | SSL Loss 0.028701 | Top1 Acc 1.25% | coef 0.017266
+train | Iteration 200/10000 | Cls Loss 2.571182 | SSL Loss 0.070300 | Top1 Acc 3.62% | coef 0.040437
