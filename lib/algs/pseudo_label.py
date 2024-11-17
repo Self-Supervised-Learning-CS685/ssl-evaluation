@@ -12,13 +12,17 @@ class PL(nn.Module):
         self.n_classes = n_classes
         self.lambda_decay = 0.99
         self.mu = mu
+        self.min_th = 0.6
+        self.max_th = 0.95
+        self.iter_count = 0
+        self.confidence = 0
 
     def forward(self, x, y, model, mask):
         # import ipdb; ipdb.set_trace()
         y_probs = y.softmax(1)
                 
         onehot_label = self.__make_one_hot(y_probs.max(1)[1]).float()
-        print("old thres:", self.th)
+        #print("old thres:", self.th)
         
         max_q_b = y_probs.max(dim=1)[0]
         
@@ -28,21 +32,27 @@ class PL(nn.Module):
         
         file_path = 'y_probs.csv'
         new_row = [self.th, mean_confidence, max_confidence]
-        if not os.path.isfile(file_path):
-            with open(file_path, mode="w", newline="") as file:
-                writer = csv.writer(file)
-                writer.writerow(new_row)
-        else:
-            with open(file_path, mode="a", newline="") as file:
-                writer = csv.writer(file)
-                writer.writerow(new_row)
+
+        #print("new row added:", new_row)
+        # if max_confidence > self.confidence:
+        #     if self.th > self.min_th and self.th < self.max_th:
+        #         self.th = self.th - ((1-self.lambda_decay) * max_q_b.mean()).item()
         
-        print("new row added:", new_row)
-        
-        self.th = self.th + ((1-self.lambda_decay) * max_q_b.mean()).item()
-        
+        self.confidence = max_q_b.mean().item()
+        new_th = (self.lambda_decay * self.th) + ((1-self.lambda_decay) * max_q_b.mean()).item()
+        if self.iter_count > 200 and self.iter_count < 3000:
+            self.th = new_th
+        #if new_th > self.th:
+            #self.th = new_th
+            #self.th = (self.lambda_decay * self.th) - ((1-self.lambda_decay) * max_q_b.mean()).item()
+        #Keep in min-max range
+        # if self.th < self.min_th:
+        #     self.th = self.min_th
+        # if self.th > self.max_th:
+        #     self.th = self.max_th
         gt_mask = (y_probs > self.th).float()
         gt_mask = gt_mask.max(1)[0] # reduce_any
+        
         lt_mask = 1 - gt_mask # logical not
         p_target = gt_mask[:,None] * 10 * onehot_label + lt_mask[:,None] * y_probs
         # model.update_batch_stats(False)
@@ -56,11 +66,19 @@ class PL(nn.Module):
         correct_predictions = (pred_classes == true_classes).sum().item()
         total_images = onehot_label.size(0)
         #print(f"Correctly classified images: {correct_predictions} out of {total_images}")
-
-        
+        new_row = new_row + [gt_mask.sum().item(), correct_predictions, total_images]
+        if not os.path.isfile(file_path):
+            with open(file_path, mode="w", newline="") as file:
+                writer = csv.writer(file)
+                writer.writerow(new_row)
+        else:
+            with open(file_path, mode="a", newline="") as file:
+                writer = csv.writer(file)
+                writer.writerow(new_row)
         loss = (-(p_target.detach() * F.log_softmax(output, 1)).sum(1)*mask).mean()
         # model.update_batch_stats(True)
         ##quit()
+        self.iter_count += 1
         return loss
 
     def __make_one_hot(self, y):
