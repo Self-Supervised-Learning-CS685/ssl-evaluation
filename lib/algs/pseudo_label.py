@@ -33,23 +33,28 @@ class PL(nn.Module):
         file_path = 'y_probs.csv'
         new_row = [self.th, mean_confidence, max_confidence]
 
-        #print("new row added:", new_row)
-        # if max_confidence > self.confidence:
-        #     if self.th > self.min_th and self.th < self.max_th:
-        #         self.th = self.th - ((1-self.lambda_decay) * max_q_b.mean()).item()
+        #CONFIG1
+        #self.th = (self.lambda_decay * self.th) + ((1-self.lambda_decay) * max_q_b.mean()).item()
+
+        #CONFIG2
+        # new_th = (self.lambda_decay * self.th) + ((1-self.lambda_decay) * max_q_b.mean()).item()
+        # if new_th > self.th:
+        #     self.th = new_th
         
-        self.confidence = max_q_b.mean().item()
-        new_th = (self.lambda_decay * self.th) + ((1-self.lambda_decay) * max_q_b.mean()).item()
-        if self.iter_count > 200 and self.iter_count < 3000:
-            self.th = new_th
-        #if new_th > self.th:
-            #self.th = new_th
-            #self.th = (self.lambda_decay * self.th) - ((1-self.lambda_decay) * max_q_b.mean()).item()
-        #Keep in min-max range
-        # if self.th < self.min_th:
-        #     self.th = self.min_th
-        # if self.th > self.max_th:
-        #     self.th = self.max_th
+        #CONFIG3
+        # self.th = self.th
+        
+        #CONFIG 5
+        # new_th = (self.lambda_decay * self.th) + ((1-self.lambda_decay) * max_q_b.mean()).item()
+        # if new_th > self.th and self.iter > 2000:
+        #     self.th = new_th
+        
+        #CONFG 6
+        # new_th = (self.lambda_decay * self.th) + ((1-self.lambda_decay) * max_q_b.mean()).item()
+        # if self.iter_count > 200 and self.iter_count < 3000:
+        #     self.th = new_th
+        
+        
         gt_mask = (y_probs > self.th).float()
         gt_mask = gt_mask.max(1)[0] # reduce_any
         
