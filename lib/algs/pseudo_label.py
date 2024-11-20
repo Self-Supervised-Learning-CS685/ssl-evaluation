@@ -72,12 +72,18 @@ class PL(nn.Module):
         #this one works well
         
         #CONFIG 10
+        # if self.iter_count > 700 and self.th > self.min_th:
+        #     if max_confidence > self.confidence:
+        #         self.th = self.th - (0.0001 * (max_confidence-self.confidence))
+        
+        # self.confidence = max_confidence
+        
+        #CONFIG 11
         if self.iter_count > 700 and self.th > self.min_th:
             if max_confidence > self.confidence:
-                self.th = self.th - (0.0001 * (max_confidence-self.confidence))
+                self.th = self.th - (0.001 * (max_confidence-self.confidence))
         
         self.confidence = max_confidence
-        
         
         gt_mask = (y_probs > self.th).float()
         gt_mask = gt_mask.max(1)[0] # reduce_any
