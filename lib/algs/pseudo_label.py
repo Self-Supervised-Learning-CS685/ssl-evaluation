@@ -12,9 +12,7 @@ class PL(nn.Module):
         # import ipdb; ipdb.set_trace()
         y_probs = y.softmax(1)
         onehot_label = self.__make_one_hot(y_probs.max(1)[1]).float()
-        print(self.th)
         self.th = self.th-0.00001
-        print(self.th)
         gt_mask = (y_probs > self.th).float()
         gt_mask = gt_mask.max(1)[0] # reduce_any
         lt_mask = 1 - gt_mask # logical not
@@ -26,14 +24,9 @@ class PL(nn.Module):
 
         pred_classes = pred_onehot_label.argmax(dim=1)
         true_classes = onehot_label.argmax(dim=1)
-        print(y_probs)
-        correct_predictions = (pred_classes == true_classes).sum().item()
-        total_images = onehot_label.size(0)
-        print(f"Correctly classified images: {correct_predictions} out of {total_images}")
 
         loss = (-(p_target.detach() * F.log_softmax(output, 1)).sum(1)*mask).mean()
         # model.update_batch_stats(True)
-        quit()
         return loss
 
     def __make_one_hot(self, y):

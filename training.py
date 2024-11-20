@@ -187,7 +187,7 @@ def train_model(args, model, model_t, dataloaders, criterion, optimizer,
         iteration += 1 
 
         model.train()
-        
+
         l_input, target = l_data
         u_input, dummy_target = u_data
 
@@ -203,7 +203,7 @@ def train_model(args, model, model_t, dataloaders, criterion, optimizer,
             u_input = m(u_input)
         else:
             m = None
-            
+
         # forward
         with torch.set_grad_enabled(True):                
             if args.alg == 'distill':
@@ -229,9 +229,9 @@ def train_model(args, model, model_t, dataloaders, criterion, optimizer,
                 ## for other semi-supervised methods
                 target = torch.cat([target, -torch.ones(args.batch_size//2).to(device).long()], 0)
                 unlabeled_mask = (target == -1).float()
-                
+
                 inputs = torch.cat([l_input, u_input], 0)
-                
+
                 outputs = model(inputs)
 
                 coef = args.consis_coef * math.exp(-5 * (1 - min(iteration/args.warmup, 1))**2)
@@ -242,7 +242,6 @@ def train_model(args, model, model_t, dataloaders, criterion, optimizer,
                     ssl_loss -= args.em * ((outputs.softmax(1) * F.log_softmax(outputs, 1)).sum(1) * unlabeled_mask).mean()
                 cls_loss = F.cross_entropy(outputs, target, reduction="none", ignore_index=-1).mean()
                 loss = cls_loss + ssl_loss
-
                 correct_1, correct_5 = compute_correct(outputs[:args.batch_size//2,:], target[:args.batch_size//2], topk=(1, 5))
             else:
                 ## for supervised baseline
@@ -250,7 +249,6 @@ def train_model(args, model, model_t, dataloaders, criterion, optimizer,
                 loss = criterion(outputs, target)
 
                 correct_1, correct_5 = compute_correct(outputs, target, topk=(1, 5))
-            
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
@@ -266,9 +264,22 @@ def train_model(args, model, model_t, dataloaders, criterion, optimizer,
             running_loss_ssl += ssl_loss.item()
         else:
             running_loss += loss.item()
-        
         running_corrects_1 += correct_1.item()
         running_corrects_5 += correct_5.item()
+
+        dir_name = os.path.join(args.exp_prefix, args.exp_dir)
+        file_name = os.path.join(dir_name, "global_thresh_top1.txt")
+        if not file_name:
+            f.write("Threshold Top1accuracy Loss")
+        f = open(file_name, "a")
+        f.write(
+            "%.5f %.5f %.8f \n"
+            % (
+                ssl_obj.th,
+                running_corrects_1 * 100 / (print_freq * args.batch_size // 2),
+                loss,
+            )
+        )
 
         ## Print training loss/acc ##
         if (iteration+1) % print_freq==0:
@@ -288,7 +299,7 @@ def train_model(args, model, model_t, dataloaders, criterion, optimizer,
                     'train', iteration+1, len(dataloaders['l_train']), running_loss/print_freq, \
                     running_corrects_1*100/(print_freq*l_input.size(0)), running_corrects_5*100/(print_freq*l_input.size(0)) ))
                 writer.add_scalar('train/loss', running_loss/print_freq, iteration)
-                
+
             writer.add_scalar('train/top1_acc', running_corrects_1*100/(print_freq*l_input.size(0)), iteration)
             writer.add_scalar('train/top5_acc', running_corrects_5*100/(print_freq*l_input.size(0)), iteration)
 
@@ -351,7 +362,7 @@ def train_model(args, model, model_t, dataloaders, criterion, optimizer,
                 'model_state_dict': model.state_dict(),
                 'optimizer_state_dict' : optimizer.state_dict(),
                 }, is_best, checkpoint_folder=checkpoint_folder)
-        
+
         ## my setting
         if scheduler is None:
             ## Manually decrease lr if not using scheduler
@@ -359,11 +370,9 @@ def train_model(args, model, model_t, dataloaders, criterion, optimizer,
                 optimizer.param_groups[0]["lr"] *= args.lr_decay_factor
         writer.add_scalar('lr', optimizer.param_groups[0]["lr"], iteration)
 
-
     time_elapsed = time.time() - since
     logger.info('Training complete in {:.0f}m {:.0f}s'.format(time_elapsed // 60, time_elapsed % 60))
     logger.info('Best val Acc: {:.2f}%'.format(best_acc))
-
 
     ##############
     #### Test ####
