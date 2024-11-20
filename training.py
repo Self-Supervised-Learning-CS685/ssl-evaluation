@@ -187,7 +187,6 @@ def train_model(args, model, model_t, dataloaders, criterion, optimizer,
         iteration += 1 
 
         model.train()
-
         l_input, target = l_data
         u_input, dummy_target = u_data
 
@@ -203,7 +202,6 @@ def train_model(args, model, model_t, dataloaders, criterion, optimizer,
             u_input = m(u_input)
         else:
             m = None
-
         # forward
         with torch.set_grad_enabled(True):                
             if args.alg == 'distill':
@@ -229,9 +227,7 @@ def train_model(args, model, model_t, dataloaders, criterion, optimizer,
                 ## for other semi-supervised methods
                 target = torch.cat([target, -torch.ones(args.batch_size//2).to(device).long()], 0)
                 unlabeled_mask = (target == -1).float()
-
                 inputs = torch.cat([l_input, u_input], 0)
-
                 outputs = model(inputs)
 
                 coef = args.consis_coef * math.exp(-5 * (1 - min(iteration/args.warmup, 1))**2)
@@ -243,6 +239,9 @@ def train_model(args, model, model_t, dataloaders, criterion, optimizer,
                 cls_loss = F.cross_entropy(outputs, target, reduction="none", ignore_index=-1).mean()
                 loss = cls_loss + ssl_loss
                 correct_1, correct_5 = compute_correct(outputs[:args.batch_size//2,:], target[:args.batch_size//2], topk=(1, 5))
+                _, labels = F.softmax(outputs, 1).max(1)
+                mismatches = (labels != target).sum().item()
+
             else:
                 ## for supervised baseline
                 outputs = model(l_input)
@@ -270,14 +269,15 @@ def train_model(args, model, model_t, dataloaders, criterion, optimizer,
         dir_name = os.path.join(args.exp_prefix, args.exp_dir)
         file_name = os.path.join(dir_name, "global_thresh_top1.txt")
         if not file_name:
-            f.write("Threshold Top1accuracy Loss")
+            f.write("Threshold Top1accuracy Loss Mismatch")
         f = open(file_name, "a")
         f.write(
-            "%.5f %.5f %.8f \n"
+            "%.5f %.5f %.8f %.8f \n"
             % (
                 ssl_obj.th,
                 running_corrects_1 * 100 / (print_freq * args.batch_size // 2),
                 loss,
+                ((args.batch_size- mismatches)*100 )/ (args.batch_size),
             )
         )
 
@@ -299,7 +299,6 @@ def train_model(args, model, model_t, dataloaders, criterion, optimizer,
                     'train', iteration+1, len(dataloaders['l_train']), running_loss/print_freq, \
                     running_corrects_1*100/(print_freq*l_input.size(0)), running_corrects_5*100/(print_freq*l_input.size(0)) ))
                 writer.add_scalar('train/loss', running_loss/print_freq, iteration)
-
             writer.add_scalar('train/top1_acc', running_corrects_1*100/(print_freq*l_input.size(0)), iteration)
             writer.add_scalar('train/top5_acc', running_corrects_5*100/(print_freq*l_input.size(0)), iteration)
 
@@ -362,7 +361,6 @@ def train_model(args, model, model_t, dataloaders, criterion, optimizer,
                 'model_state_dict': model.state_dict(),
                 'optimizer_state_dict' : optimizer.state_dict(),
                 }, is_best, checkpoint_folder=checkpoint_folder)
-
         ## my setting
         if scheduler is None:
             ## Manually decrease lr if not using scheduler
