@@ -266,18 +266,22 @@ def train_model(args, model, model_t, dataloaders, criterion, optimizer,
         running_corrects_1 += correct_1.item()
         running_corrects_5 += correct_5.item()
 
+        y_probs = outputs.detach().softmax(1)
+        max_confidence = y_probs.max(dim=1)[0].mean().item()
+
         dir_name = os.path.join(args.exp_prefix, args.exp_dir)
         file_name = os.path.join(dir_name, "global_thresh_top1.txt")
         if not file_name:
-            f.write("Threshold Top1accuracy Loss Mismatch")
+            f.write("Threshold Top1accuracy Loss Mismatch Confidence")
         f = open(file_name, "a")
         f.write(
-            "%.5f %.5f %.8f %.8f \n"
+            "%.5f %.5f %.8f %.8f %.8f\n"
             % (
                 ssl_obj.th,
                 running_corrects_1 * 100 / (print_freq * args.batch_size // 2),
                 loss,
-                ((args.batch_size- mismatches)*100 )/ (args.batch_size),
+                ((args.batch_size - mismatches) * 100) / (args.batch_size),
+                max_confidence,
             )
         )
 
