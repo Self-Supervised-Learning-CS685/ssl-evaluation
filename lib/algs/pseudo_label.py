@@ -12,7 +12,7 @@ class PL(nn.Module):
         # import ipdb; ipdb.set_trace()
         y_probs = y.softmax(1)
         onehot_label = self.__make_one_hot(y_probs.max(1)[1]).float()
-        self.th = self.th-0.00001
+        self.th = self.th-0.000015
         gt_mask = (y_probs > self.th).float()
         gt_mask = gt_mask.max(1)[0] # reduce_any
         lt_mask = 1 - gt_mask # logical not
