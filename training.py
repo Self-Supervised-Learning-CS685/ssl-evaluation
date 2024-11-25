@@ -180,6 +180,9 @@ def train_model(args, model, model_t, dataloaders, criterion, optimizer,
     running_corrects_1 = 0
     running_corrects_5 = 0
 
+    # Keep track of frequency of classes that crossed threshold
+    class_freq = torch.zeros(200).to(device)
+
     ####################
     ##### Training #####
     ####################
@@ -236,8 +239,9 @@ def train_model(args, model, model_t, dataloaders, criterion, optimizer,
 
                 coef = args.consis_coef * math.exp(-5 * (1 - min(iteration/args.warmup, 1))**2)
                 writer.add_scalar('train/coef', coef, iteration)
-                ssl_loss = ssl_obj(inputs, outputs.detach(), model, unlabeled_mask) * coef
-
+                ssl_loss, cf = ssl_obj(inputs, outputs.detach(), model, unlabeled_mask)
+                ssl_loss *= coef
+                class_freq += cf
                 if args.em > 0:
                     ssl_loss -= args.em * ((outputs.softmax(1) * F.log_softmax(outputs, 1)).sum(1) * unlabeled_mask).mean()
                 cls_loss = F.cross_entropy(outputs, target, reduction="none", ignore_index=-1).mean()
@@ -375,4 +379,51 @@ def train_model(args, model, model_t, dataloaders, criterion, optimizer,
     test(model,dataloaders,args,logger,"Best")
 
     writer.close()
+
+    # Calculate kurtosis of class frequency
+    kurtosis = calculate_kurtosis(class_freq)
+    # Store class frequency and kurtosis in file
+    with open(os.path.join(args.exp_prefix, args.exp_dir, 'class_freq.txt'), 'w') as f:
+        f.write('Class Frequency\n')
+        f.write(str(class_freq.cpu().
+            numpy().tolist()) + '\n')
+        f.write('Kurtosis\n')
+        f.write(str(kurtosis.cpu().numpy().tolist()) + '\n')
+        
     return model, val_acc_history
+
+
+def calculate_kurtosis(tensor, dim=None, unbiased=True, fisher=True):
+    """
+    Calculate the kurtosis of a PyTorch tensor.
+    
+    Parameters:
+        tensor (torch.Tensor): The input tensor.
+        dim (int, optional): The dimension along which to calculate kurtosis. 
+                             If None, calculate for the flattened tensor.
+        unbiased (bool): If True, use the unbiased estimator for variance. Default is True.
+        fisher (bool): If True, adjust for Fisher's definition of kurtosis (subtract 3). Default is True.
+    
+    Returns:
+        torch.Tensor: The kurtosis of the tensor along the specified dimension.
+    """
+    if dim is None:
+        tensor = tensor.flatten()
+    
+    # Mean
+    mean = torch.mean(tensor, dim=dim, keepdim=True)
+    # Standard deviation
+    std = torch.std(tensor, dim=dim, unbiased=unbiased, keepdim=True)
+    # Fourth moment
+    fourth_moment = torch.mean((tensor - mean) ** 4, dim=dim)
+    # Variance squared
+    variance_squared = std ** 4
+    
+    # Kurtosis
+    kurtosis = fourth_moment / variance_squared
+
+    # Adjust for Fisher's definition
+    if fisher:
+        kurtosis = kurtosis - 3
+    
+    return kurtosis

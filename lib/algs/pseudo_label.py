@@ -30,14 +30,19 @@ class PL(nn.Module):
             gt_mask = (y_probs > self.th_per_class).float()
         else:
             gt_mask = (y_probs > self.th).float()
-        gt_mask = gt_mask.max(1)[0] # reduce_any
+
+        gt_mask, gt_mask_idxs = gt_mask.max(1) # reduce_any 
+        class_freq = torch.zeros(self.n_classes, device=x.device)
+        for i in gt_mask_idxs:
+            class_freq[i] += 1
+
         lt_mask = 1 - gt_mask # logical not
         p_target = gt_mask[:,None] * 10 * onehot_label + lt_mask[:,None] * y_probs
         # model.update_batch_stats(False)
         output = model(x)
         loss = (-(p_target.detach() * F.log_softmax(output, 1)).sum(1)*mask).mean()
         # model.update_batch_stats(True)
-        return loss
+        return loss, class_freq
 
     def __make_one_hot(self, y):
         return torch.eye(self.n_classes, device=y.device)[y]

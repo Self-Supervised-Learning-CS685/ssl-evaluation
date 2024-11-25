@@ -277,6 +277,10 @@ def main(args):
             logger_name=logger_name, checkpoint_folder=checkpoint_folder,
             start_iter=start_iter, best_acc=best_acc, writer=writer, ssl_obj=ssl_obj, scheduler=scheduler)
     
+    # Save validation accuracy history as CSV to plot later
+    with open(os.path.join(args.exp_prefix, args.exp_dir, 'val_acc_history.csv'), 'w') as f:
+        for acc in val_acc_history:
+            f.write(f"{acc}\n")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
