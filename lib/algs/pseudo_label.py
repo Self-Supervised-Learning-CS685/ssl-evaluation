@@ -22,9 +22,22 @@ class PL(nn.Module):
         onehot_label = self.__make_one_hot(y_probs.max(1)[1]).float()
         max_confidence = y_probs.max(dim=1)[0].mean().item()
         
-        if self.iter_count > 700 and self.th > self.min_th:
-            if max_confidence > self.confidence:
-                self.th = self.th - ((1-self.lambda_decay) * (max_confidence-self.confidence))
+        #if self.iter_count > 700 and self.th > self.min_th:
+        from statistics import harmonic_mean
+        
+        #global threshold
+        if max_confidence > self.confidence and self.th >= self.min_th:
+            self.th = self.th - ((1-self.lambda_decay) * (max_confidence-self.confidence))
+            
+         
+        #class threshold
+        #Add your update rule   
+        #self.th_per_class = None
+        
+        #combined
+        #self.final_th = harmonic_mean([self.th, self.th_per_class])
+        
+        
         
         self.confidence = max_confidence
         
