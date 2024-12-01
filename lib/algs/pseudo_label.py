@@ -3,9 +3,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class PL(nn.Module):
-    def __init__(self, threshold, n_classes=10, freq_per_class=None, lambda_decay=0.99):
+    def __init__(self, threshold, n_classes=10, freq_per_class=None, lambda_decay=0.999):
         super().__init__()
-        # self.th = threshold
+        self.th = threshold
         # self.th = 1 / n_classes
         self.n_classes = n_classes
         self.freq_per_class = freq_per_class
@@ -15,6 +15,7 @@ class PL(nn.Module):
         self.max_th = 0.95
         self.iter_count = 0
         self.confidence = 0
+        self.max_confidence = 0
         # Set threshold per class as 1/n_classes
         self.th_per_class = torch.ones(n_classes) / n_classes
         self.th_per_class = self.th_per_class.to('mps')
@@ -36,17 +37,37 @@ class PL(nn.Module):
         onehot_label = self.__make_one_hot(y_probs.max(1)[1]).float()
 
         max_confidence = y_probs.max(dim=1)[0].mean().item()
+        confidence = y_probs.mean(dim=0)
         
-        # if self.iter_count > 700 and self.th > self.min_th:
-            # if max_confidence > self.confidence:
-        # self.th = self.th * self.lambda_decay + ((1-self.lambda_decay) * (max_confidence))
-        self.th_per_class = self.th_per_class * self.lambda_decay + (1. - self.lambda_decay) * y_probs.mean(dim=0)
+        # if self.iter_count > 700:
+        # Use max(delta_max_confidence, 0) as threshold
+        max_indicator = int((self.th > self.min_th))
+        delta_max_confidence = max(max_confidence - self.max_confidence, 0) * max_indicator
+        self.th = self.th - ((1-self.lambda_decay) * delta_max_confidence)
+            # Use max(delta_confidence, 0) as threshold per class
+            # Create an indicator for each class if threshold is larger than min threshold
+        indicator = (self.th_per_class > self.min_th).float()
+        delta_confidence = torch.max(confidence - self.confidence, torch.zeros_like(confidence)) * indicator
+        self.th_per_class = self.th_per_class - ((1. - self.lambda_decay) * delta_confidence)
         # Set final threshold as maxnorm of threshold per class * global threshold
-        self.th_per_class = (self.th_per_class - self.th_per_class.min()) / (self.th_per_class.max() - self.th_per_class.min())
-        self.th_per_class = self.th_per_class * (self.max_th - self.min_th) + self.min_th
+            # self.th_per_class = (self.th_per_class - self.th_per_class.min()) / (self.th_per_class.max() - self.th_per_class.min())
+            # self.th_per_class = self.th_per_class * (self.max_th - self.min_th) + self.min_th
+        # Set final class based thresholds as harmonic mean of threshold per class and global threshold
+        # self.th_per_class is 1X200 tensor and self.th is scalar. We want final self.th_per_class to be 1X200 tensor
+        self.th_per_class = (2 * self.th_per_class * self.th) / (self.th_per_class + self.th)
+        
 
         # self.th_per_class = self.th_per_class * self.th
         # self.confidence = max_confidence
+        # Store thresholds per class in a CSV file for further analysis. there are 200 classes in CIFAR-100
+        with open('class_thresholds.csv', 'a') as f:
+            f.write(','.join([str(i) for i in self.th_per_class.cpu().numpy
+            ()]) + '\n')
+
+
+        self.iter_count += 1
+        self.confidence = confidence
+        self.max_confidence = max_confidence
 
 
         # Set threshold as MaxNorm of threshold per class * global threshold
