@@ -20,7 +20,7 @@ class PL(nn.Module):
         # import ipdb; ipdb.set_trace()
         y_probs = y.softmax(1)    
         onehot_label = self.__make_one_hot(y_probs.max(1)[1]).float()
-        max_confidence = y_probs.max(dim=1)[0].mean().item()
+        max_confidence = y_probs.mean(dim=1)[0].mean().item()
         
         #if self.iter_count > 700 and self.th > self.min_th:
         #from statistics import harmonic_mean
