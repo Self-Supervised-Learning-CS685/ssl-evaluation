@@ -36,7 +36,7 @@ class PL(nn.Module):
         y_probs = y.softmax(1)
         onehot_label = self.__make_one_hot(y_probs.max(1)[1]).float()
 
-        max_confidence = y_probs.max(dim=1)[0].mean().item()
+        max_confidence = y_probs.mean(dim=1)[0].mean().item()
         confidence = y_probs.mean(dim=0)
         
         # if self.iter_count > 700:
