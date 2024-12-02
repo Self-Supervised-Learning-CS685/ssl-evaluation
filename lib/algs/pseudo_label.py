@@ -23,7 +23,7 @@ class PL(nn.Module):
         max_confidence = y_probs.max(dim=1)[0].mean().item()
         
         #if self.iter_count > 700 and self.th > self.min_th:
-        from statistics import harmonic_mean
+        #from statistics import harmonic_mean
         
         #global threshold
         if max_confidence > self.confidence and self.th >= self.min_th:
