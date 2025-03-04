@@ -38,7 +38,13 @@ def compute_correct(output, target, topk=(1,)):
 
 def get_pl(model, dataloader, logger_name, thres, out_name, curriculum=False, ratio=1.0):
     logger = logging.getLogger(logger_name)
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    if torch.cuda.is_available():
+        device = torch.device("cuda:0")
+    elif torch.backends.mps.is_available():
+        device = torch.device("mps")
+    else:
+        device = torch.device("cpu")
+    # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model.eval()
     test_corrects_1 = 0
     test_corrects_5 = 0
@@ -88,11 +94,24 @@ def get_pl(model, dataloader, logger_name, thres, out_name, curriculum=False, ra
 
 
 def test(model, dataloaders, args, logger, name="Best", criterion=nn.CrossEntropyLoss()):
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    if torch.cuda.is_available():
+        device = torch.device("cuda:0")
+    elif torch.backends.mps.is_available():
+        device = torch.device("mps")
+    else:
+        device = torch.device("cpu")
+    # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model.eval()
     test_corrects_1 = 0
     test_corrects_5 = 0
     test_loss = 0
+
+    dir_name = os.path.join(args.exp_prefix, args.exp_dir, 'test')
+    if not os.path.exists(dir_name):
+        os.makedirs(dir_name)
+    file_name = os.path.join(dir_name, "pl.txt")
+
+    f = open(file_name, "w")
     for i,data in enumerate(dataloaders['test']):
         inputs, target = data
         inputs = inputs.to(device).float()
@@ -109,6 +128,13 @@ def test(model, dataloaders, args, logger, name="Best", criterion=nn.CrossEntrop
 
             correct_1, correct_5 = compute_correct(outputs, target, topk=(1, 5))
             test_loss += loss.item()
+
+            preds, labels = F.softmax(outputs, 1).max(1)
+
+            ## Get PL and save to file
+            for j in range(preds.shape[0]):
+                # print(labels[j], target[j])
+                f.write("%d %d \n" % (target[j], labels[j]))
 
         test_corrects_1 += correct_1.item()
         test_corrects_5 += correct_5.item()
@@ -132,7 +158,13 @@ def train_model(args, model, model_t, dataloaders, criterion, optimizer,
 
     logger = logging.getLogger(logger_name)
 
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    if torch.cuda.is_available():
+        device = torch.device("cuda:0")
+    elif torch.backends.mps.is_available():
+        device = torch.device("mps")
+    else:
+        device = torch.device("cpu")
+    # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     since = time.time()
 
     val_acc_history = []
@@ -147,6 +179,9 @@ def train_model(args, model, model_t, dataloaders, criterion, optimizer,
     running_loss_ssl = 0.0
     running_corrects_1 = 0
     running_corrects_5 = 0
+
+    # Keep track of frequency of classes that crossed threshold
+    class_freq = torch.zeros(200).to(device)
 
     ####################
     ##### Training #####
@@ -204,8 +239,9 @@ def train_model(args, model, model_t, dataloaders, criterion, optimizer,
 
                 coef = args.consis_coef * math.exp(-5 * (1 - min(iteration/args.warmup, 1))**2)
                 writer.add_scalar('train/coef', coef, iteration)
-                ssl_loss = ssl_obj(inputs, outputs.detach(), model, unlabeled_mask) * coef
-
+                ssl_loss, cf = ssl_obj(inputs, outputs.detach(), model, unlabeled_mask)
+                ssl_loss *= coef
+                class_freq += cf
                 if args.em > 0:
                     ssl_loss -= args.em * ((outputs.softmax(1) * F.log_softmax(outputs, 1)).sum(1) * unlabeled_mask).mean()
                 cls_loss = F.cross_entropy(outputs, target, reduction="none", ignore_index=-1).mean()
@@ -343,4 +379,51 @@ def train_model(args, model, model_t, dataloaders, criterion, optimizer,
     test(model,dataloaders,args,logger,"Best")
 
     writer.close()
+
+    # Calculate kurtosis of class frequency
+    kurtosis = calculate_kurtosis(class_freq)
+    # Store class frequency and kurtosis in file
+    with open(os.path.join(args.exp_prefix, args.exp_dir, 'class_freq.txt'), 'w') as f:
+        f.write('Class Frequency\n')
+        f.write(str(class_freq.cpu().
+            numpy().tolist()) + '\n')
+        f.write('Kurtosis\n')
+        f.write(str(kurtosis.cpu().numpy().tolist()) + '\n')
+        
     return model, val_acc_history
+
+
+def calculate_kurtosis(tensor, dim=None, unbiased=True, fisher=True):
+    """
+    Calculate the kurtosis of a PyTorch tensor.
+    
+    Parameters:
+        tensor (torch.Tensor): The input tensor.
+        dim (int, optional): The dimension along which to calculate kurtosis. 
+                             If None, calculate for the flattened tensor.
+        unbiased (bool): If True, use the unbiased estimator for variance. Default is True.
+        fisher (bool): If True, adjust for Fisher's definition of kurtosis (subtract 3). Default is True.
+    
+    Returns:
+        torch.Tensor: The kurtosis of the tensor along the specified dimension.
+    """
+    if dim is None:
+        tensor = tensor.flatten()
+    
+    # Mean
+    mean = torch.mean(tensor, dim=dim, keepdim=True)
+    # Standard deviation
+    std = torch.std(tensor, dim=dim, unbiased=unbiased, keepdim=True)
+    # Fourth moment
+    fourth_moment = torch.mean((tensor - mean) ** 4, dim=dim)
+    # Variance squared
+    variance_squared = std ** 4
+    
+    # Kurtosis
+    kurtosis = fourth_moment / variance_squared
+
+    # Adjust for Fisher's definition
+    if fisher:
+        kurtosis = kurtosis - 3
+    
+    return kurtosis

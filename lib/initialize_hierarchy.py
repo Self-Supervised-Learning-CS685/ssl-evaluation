@@ -33,7 +33,13 @@ def initialize_model(model_name, num_classes, feature_extract=False,
         num_ftrs = model_ft.fc.in_features
         model_ft.fc = nn.Linear(num_ftrs, num_classes)
 
-        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        if torch.cuda.is_available():
+            device = torch.device("cuda:0")
+        elif torch.backends.mps.is_available():
+            device = torch.device("mps")
+        else:
+            device = torch.device("cpu")
+        # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
         W_s2g = np.load('data/semi_inat/taxa_weights.npz')['W_s2g']
         W_g2f = np.load('data/semi_inat/taxa_weights.npz')['W_g2f']

@@ -39,7 +39,14 @@ def compute_correct(output, target, topk=(1,)):
 
 def get_pl(model, dataloader, logger_name, thres, out_name, curriculum=False, ratio=1.0):
     logger = logging.getLogger(logger_name)
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    if torch.cuda.is_available():
+        device = torch.device("cuda:0")
+    elif torch.backends.mps.is_available():
+        device = torch.device("mps")
+    else:
+        device = torch.device("cpu")
+    # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    
     model.eval()
     test_corrects_1 = 0
     count = 0
@@ -138,7 +145,13 @@ def forward_hierarchy(outputs, l_targets, u_outputs, u_targets, args, model, cri
 
 
 def test(model, dataloaders, args, logger, name="Best", criterion=nn.CrossEntropyLoss()):
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    if torch.cuda.is_available():
+        device = torch.device("cuda:0")
+    elif torch.backends.mps.is_available():
+        device = torch.device("mps")
+    else:
+        device = torch.device("cpu")
+    # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model.eval()
     test_corrects_1 = 0
     test_loss = 0
@@ -213,7 +226,14 @@ def train_model(args, model, model_t, dataloaders, criterion, optimizer,
 
     logger = logging.getLogger(logger_name)
 
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    if torch.cuda.is_available():
+        device = torch.device("cuda:0")
+    elif torch.backends.mps.is_available():
+        device = torch.device("mps")
+    else:
+        device = torch.device("cpu")
+
+    # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     since = time.time()
 
     val_acc_history = []

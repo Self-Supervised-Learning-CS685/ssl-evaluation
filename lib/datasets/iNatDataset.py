@@ -34,9 +34,14 @@ def make_dataset(dataset_root, split, task='All', pl_list=None):
         img[idx][1] = int(x[1])
 
     classes = [x[1] for x in img]
+    # check if classes are all -1
+    if classes[0] == -1:
+        freq_per_class = None
+    else:
+        freq_per_class = np.bincount(classes)
     num_classes = len(set(classes)) 
     print('# images in {}: {}'.format(split,len(img)))
-    return img, num_classes
+    return img, num_classes, freq_per_class
 
 
 class iNatDataset(data.Dataset):
@@ -46,7 +51,7 @@ class iNatDataset(data.Dataset):
         self.dataset_root = dataset_root
         self.task = task
 
-        self.imgs, self.num_classes = make_dataset(self.dataset_root, 
+        self.imgs, self.num_classes, self.freq_per_class = make_dataset(self.dataset_root, 
                     split, self.task, pl_list=pl_list)
 
         self.transform = transform
@@ -72,3 +77,6 @@ class iNatDataset(data.Dataset):
 
     def get_num_classes(self):
         return self.num_classes
+    
+    def get_freq_per_class(self):
+        return self.freq_per_class

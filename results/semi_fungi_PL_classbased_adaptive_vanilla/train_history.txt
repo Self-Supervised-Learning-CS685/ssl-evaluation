@@ -1,0 +1,91 @@
+train | Iteration 100/5000 | Cls Loss 2.676674 | SSL Loss 0.150419 | Top1 Acc 0.50% | coef 0.017266
+train | Iteration 200/5000 | Cls Loss 2.684721 | SSL Loss 0.223505 | Top1 Acc 0.44% | coef 0.040437
+Val | Iteration 200/5000 | Loss 5.626397 | Top1 Acc 0.50% | Top5 Acc 8.07%
+train | Iteration 300/5000 | Cls Loss 2.669737 | SSL Loss 0.311878 | Top1 Acc 0.19% | coef 0.085691
+train | Iteration 400/5000 | Cls Loss 2.732707 | SSL Loss 0.384325 | Top1 Acc 0.44% | coef 0.164309
+Val | Iteration 400/5000 | Loss 5.977401 | Top1 Acc 0.50% | Top5 Acc 15.35%
+train | Iteration 500/5000 | Cls Loss 2.876220 | SSL Loss 0.432122 | Top1 Acc 0.38% | coef 0.285074
+train | Iteration 100/5000 | Cls Loss 2.671129 | SSL Loss 0.147055 | Top1 Acc 1.50% | coef 0.017266
+train | Iteration 200/5000 | Cls Loss 2.669929 | SSL Loss 0.221858 | Top1 Acc 1.31% | coef 0.040437
+Val | Iteration 200/5000 | Loss 5.608609 | Top1 Acc 0.50% | Top5 Acc 7.95%
+train | Iteration 300/5000 | Cls Loss 2.662717 | SSL Loss 0.304383 | Top1 Acc 2.12% | coef 0.085691
+train | Iteration 400/5000 | Cls Loss 2.718140 | SSL Loss 0.374219 | Top1 Acc 2.06% | coef 0.164309
+train | Iteration 100/5000 | Cls Loss 2.672063 | SSL Loss 0.151930 | Top1 Acc 0.31% | coef 0.017266
+train | Iteration 200/5000 | Cls Loss 2.661652 | SSL Loss 0.223619 | Top1 Acc 0.56% | coef 0.040437
+Val | Iteration 200/5000 | Loss 5.568443 | Top1 Acc 0.50% | Top5 Acc 7.33%
+train | Iteration 300/5000 | Cls Loss 2.671532 | SSL Loss 0.313707 | Top1 Acc 0.81% | coef 0.085691
+train | Iteration 400/5000 | Cls Loss 2.733169 | SSL Loss 0.384097 | Top1 Acc 0.62% | coef 0.164309
+Val | Iteration 400/5000 | Loss 6.008139 | Top1 Acc 0.50% | Top5 Acc 16.20%
+train | Iteration 500/5000 | Cls Loss 2.836726 | SSL Loss 0.430582 | Top1 Acc 0.44% | coef 0.285074
+train | Iteration 600/5000 | Cls Loss 2.908940 | SSL Loss 0.456102 | Top1 Acc 0.50% | coef 0.447533
+Val | Iteration 600/5000 | Loss 6.402655 | Top1 Acc 0.60% | Top5 Acc 22.45%
+train | Iteration 700/5000 | Cls Loss 3.007385 | SSL Loss 0.473501 | Top1 Acc 0.56% | coef 0.635715
+train | Iteration 800/5000 | Cls Loss 3.081709 | SSL Loss 0.476850 | Top1 Acc 0.94% | coef 0.817091
+Val | Iteration 800/5000 | Loss 6.854498 | Top1 Acc 0.53% | Top5 Acc 26.77%
+train | Iteration 900/5000 | Cls Loss 3.070517 | SSL Loss 0.485665 | Top1 Acc 0.81% | coef 0.950274
+train | Iteration 1000/5000 | Cls Loss 3.094814 | SSL Loss 0.485736 | Top1 Acc 0.50% | coef 0.999995
+Val | Iteration 1000/5000 | Loss 6.574758 | Top1 Acc 0.70% | Top5 Acc 32.10%
+train | Iteration 1100/5000 | Cls Loss 2.980512 | SSL Loss 0.482964 | Top1 Acc 0.81% | coef 1.000000
+train | Iteration 1200/5000 | Cls Loss 2.962744 | SSL Loss 0.479520 | Top1 Acc 0.94% | coef 1.000000
+Val | Iteration 1200/5000 | Loss 6.475216 | Top1 Acc 0.55% | Top5 Acc 36.15%
+train | Iteration 1300/5000 | Cls Loss 2.947856 | SSL Loss 0.480356 | Top1 Acc 0.50% | coef 1.000000
+train | Iteration 1400/5000 | Cls Loss 2.863939 | SSL Loss 0.477287 | Top1 Acc 0.75% | coef 1.000000
+Val | Iteration 1400/5000 | Loss 6.246165 | Top1 Acc 0.62% | Top5 Acc 39.25%
+train | Iteration 1500/5000 | Cls Loss 2.837025 | SSL Loss 0.495848 | Top1 Acc 0.56% | coef 1.000000
+train | Iteration 1600/5000 | Cls Loss 2.788133 | SSL Loss 0.478791 | Top1 Acc 1.12% | coef 1.000000
+Val | Iteration 1600/5000 | Loss 5.952546 | Top1 Acc 0.80% | Top5 Acc 42.20%
+train | Iteration 1700/5000 | Cls Loss 2.742630 | SSL Loss 0.474157 | Top1 Acc 1.06% | coef 1.000000
+train | Iteration 1800/5000 | Cls Loss 2.718998 | SSL Loss 0.487134 | Top1 Acc 0.81% | coef 1.000000
+Val | Iteration 1800/5000 | Loss 6.073835 | Top1 Acc 0.97% | Top5 Acc 44.52%
+train | Iteration 1900/5000 | Cls Loss 2.656134 | SSL Loss 0.475634 | Top1 Acc 1.19% | coef 1.000000
+train | Iteration 2000/5000 | Cls Loss 2.582865 | SSL Loss 0.479465 | Top1 Acc 1.62% | coef 1.000000
+Val | Iteration 2000/5000 | Loss 6.080546 | Top1 Acc 1.15% | Top5 Acc 45.80%
+train | Iteration 2100/5000 | Cls Loss 2.628740 | SSL Loss 0.477576 | Top1 Acc 0.88% | coef 1.000000
+train | Iteration 2200/5000 | Cls Loss 2.538504 | SSL Loss 0.475168 | Top1 Acc 1.06% | coef 1.000000
+Val | Iteration 2200/5000 | Loss 5.767177 | Top1 Acc 1.15% | Top5 Acc 47.88%
+train | Iteration 2300/5000 | Cls Loss 2.552073 | SSL Loss 0.479619 | Top1 Acc 1.81% | coef 1.000000
+train | Iteration 2400/5000 | Cls Loss 2.523872 | SSL Loss 0.482308 | Top1 Acc 1.50% | coef 1.000000
+Val | Iteration 2400/5000 | Loss 5.776516 | Top1 Acc 1.07% | Top5 Acc 49.58%
+train | Iteration 2500/5000 | Cls Loss 2.460635 | SSL Loss 0.470244 | Top1 Acc 1.06% | coef 1.000000
+train | Iteration 2600/5000 | Cls Loss 2.475045 | SSL Loss 0.484094 | Top1 Acc 1.56% | coef 1.000000
+Val | Iteration 2600/5000 | Loss 5.825214 | Top1 Acc 1.12% | Top5 Acc 50.98%
+train | Iteration 2700/5000 | Cls Loss 2.413688 | SSL Loss 0.461847 | Top1 Acc 2.06% | coef 1.000000
+train | Iteration 2800/5000 | Cls Loss 2.404828 | SSL Loss 0.472754 | Top1 Acc 1.81% | coef 1.000000
+Val | Iteration 2800/5000 | Loss 5.714316 | Top1 Acc 1.30% | Top5 Acc 51.60%
+train | Iteration 2900/5000 | Cls Loss 2.379403 | SSL Loss 0.481880 | Top1 Acc 2.19% | coef 1.000000
+train | Iteration 3000/5000 | Cls Loss 2.406429 | SSL Loss 0.461401 | Top1 Acc 1.81% | coef 1.000000
+Val | Iteration 3000/5000 | Loss 5.711758 | Top1 Acc 1.27% | Top5 Acc 53.52%
+train | Iteration 3100/5000 | Cls Loss 2.369482 | SSL Loss 0.468413 | Top1 Acc 2.00% | coef 1.000000
+train | Iteration 3200/5000 | Cls Loss 2.325583 | SSL Loss 0.457091 | Top1 Acc 2.62% | coef 1.000000
+Val | Iteration 3200/5000 | Loss 5.690920 | Top1 Acc 1.25% | Top5 Acc 53.45%
+train | Iteration 3300/5000 | Cls Loss 2.333987 | SSL Loss 0.468457 | Top1 Acc 1.38% | coef 1.000000
+train | Iteration 3400/5000 | Cls Loss 2.333637 | SSL Loss 0.472293 | Top1 Acc 2.00% | coef 1.000000
+Val | Iteration 3400/5000 | Loss 5.627413 | Top1 Acc 1.25% | Top5 Acc 54.75%
+train | Iteration 3500/5000 | Cls Loss 2.256975 | SSL Loss 0.463866 | Top1 Acc 2.75% | coef 1.000000
+train | Iteration 3600/5000 | Cls Loss 2.273651 | SSL Loss 0.463622 | Top1 Acc 2.00% | coef 1.000000
+Val | Iteration 3600/5000 | Loss 5.614977 | Top1 Acc 1.30% | Top5 Acc 54.42%
+train | Iteration 3700/5000 | Cls Loss 2.271358 | SSL Loss 0.449065 | Top1 Acc 3.12% | coef 1.000000
+train | Iteration 3800/5000 | Cls Loss 2.251236 | SSL Loss 0.455980 | Top1 Acc 1.69% | coef 1.000000
+Val | Iteration 3800/5000 | Loss 5.485171 | Top1 Acc 1.32% | Top5 Acc 55.02%
+train | Iteration 3900/5000 | Cls Loss 2.279851 | SSL Loss 0.469855 | Top1 Acc 1.50% | coef 1.000000
+train | Iteration 4000/5000 | Cls Loss 2.228909 | SSL Loss 0.448148 | Top1 Acc 2.44% | coef 1.000000
+Val | Iteration 4000/5000 | Loss 5.443020 | Top1 Acc 1.40% | Top5 Acc 55.52%
+train | Iteration 4100/5000 | Cls Loss 2.235549 | SSL Loss 0.462940 | Top1 Acc 1.56% | coef 1.000000
+train | Iteration 4200/5000 | Cls Loss 2.227917 | SSL Loss 0.465341 | Top1 Acc 2.50% | coef 1.000000
+Val | Iteration 4200/5000 | Loss 5.574475 | Top1 Acc 1.25% | Top5 Acc 55.75%
+train | Iteration 4300/5000 | Cls Loss 2.215148 | SSL Loss 0.444868 | Top1 Acc 2.31% | coef 1.000000
+train | Iteration 4400/5000 | Cls Loss 2.224764 | SSL Loss 0.458729 | Top1 Acc 2.12% | coef 1.000000
+Val | Iteration 4400/5000 | Loss 5.437648 | Top1 Acc 1.38% | Top5 Acc 55.90%
+train | Iteration 4500/5000 | Cls Loss 2.188327 | SSL Loss 0.459560 | Top1 Acc 2.50% | coef 1.000000
+train | Iteration 4600/5000 | Cls Loss 2.201587 | SSL Loss 0.460086 | Top1 Acc 2.19% | coef 1.000000
+Val | Iteration 4600/5000 | Loss 5.465142 | Top1 Acc 1.30% | Top5 Acc 55.98%
+train | Iteration 4700/5000 | Cls Loss 2.220113 | SSL Loss 0.453399 | Top1 Acc 1.81% | coef 1.000000
+train | Iteration 4800/5000 | Cls Loss 2.216730 | SSL Loss 0.457038 | Top1 Acc 2.50% | coef 1.000000
+Val | Iteration 4800/5000 | Loss 5.520848 | Top1 Acc 1.32% | Top5 Acc 55.92%
+train | Iteration 4900/5000 | Cls Loss 2.212654 | SSL Loss 0.453758 | Top1 Acc 2.56% | coef 1.000000
+train | Iteration 5000/5000 | Cls Loss 2.197226 | SSL Loss 0.439841 | Top1 Acc 2.50% | coef 1.000000
+Val | Iteration 5000/5000 | Loss 5.529299 | Top1 Acc 1.32% | Top5 Acc 55.45%
+Training complete in 56m 9s
+Best val Acc: 1.40%
+testLast Loss: 5.5400 Top1 Acc: 1.30% Top5 Acc: 55.75%
+testBest Loss: 5.4430 Top1 Acc: 1.40% Top5 Acc: 55.53%
